@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BGMI College Tournament</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@400;500&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0c10;
+      --surface: #111318;
+      --surface2: #181c24;
+      --border: rgba(255, 255, 255, 0.08);
+      --border2: rgba(255, 255, 255, 0.14);
+      --accent: #f5a623;
+      --text: #f0f0f0;
+      --muted: #8a8fa0;
+      --green: #22c55e;
+      --red: #ef4444;
+      --pending: #f59e0b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+    }
+
+    nav {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border2);
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .nav-logo {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 2px;
+    }
+
+    .nav-tabs {
+      display: flex;
+      gap: 4px;
+    }
+
+    .nav-tab {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .nav-tab:hover {
+      color: var(--text);
+      background: var(--surface2);
+    }
+
+    .nav-tab.active {
+      color: var(--accent);
+      background: rgba(245, 166, 35, 0.1);
+    }
+
+    .page {
+      display: none;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    .hero {
+      text-align: center;
+      padding: 3rem 0 2rem;
+    }
+
+    .hero-tag {
+      display: inline-block;
+      background: rgba(245, 166, 35, 0.15);
+      color: var(--accent);
+      font-size: 0.75rem;
+      font-family: 'Rajdhani', sans-serif;
+      letter-spacing: 3px;
+      padding: 4px 12px;
+      border-radius: 4px;
+      margin-bottom: 1rem;
+      border: 1px solid rgba(245, 166, 35, 0.3);
+    }
+
+    .hero h1 {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 2.8rem;
+      font-weight: 700;
+      line-height: 1.1;
+      margin-bottom: 0.5rem;
+    }
+
+    .hero h1 span {
+      color: var(--accent);
+    }
+
+    .hero p {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .form-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      margin-top: 1.5rem;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group.full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      font-size: 0.78rem;
+      color: var(--muted);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    input {
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+      width: 100%;
+    }
+
+    input:focus {
+      border-color: var(--accent);
+    }
+
+    input::placeholder {
+      color: #444;
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 1.5rem 0;
+    }
+
+    .section-label {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.85rem;
+      letter-spacing: 2px;
+      color: var(--accent);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 11px 28px;
+      border-radius: 8px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #000;
+    }
+
+    .btn-primary:hover {
+      background: #e09418;
+    }
+
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--red);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-danger:hover {
+      background: rgba(239, 68, 68, 0.25);
+    }
+
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .form-footer {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 1.5rem;
+    }
+
+    #toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 10px;
+      padding: 14px 20px;
+      font-size: 0.85rem;
+      display: none;
+      align-items: center;
+      gap: 10px;
+      z-index: 999;
+      max-width: 320px;
+    }
+
+    #toast.show {
+      display: flex;
+    }
+
+    .toast-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    #toast.success .toast-dot {
+      background: var(--green);
+    }
+
+    #toast.error .toast-dot {
+      background: var(--red);
+    }
+
+    .teams-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+    }
+
+    .teams-header h2 {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+
+    .badge-count {
+      background: rgba(245, 166, 35, 0.15);
+      color: var(--accent);
+      font-size: 0.72rem;
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+
+    .teams-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1rem;
+    }
+
+    .team-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+    }
+
+    .team-card.confirmed {
+      border-left: 3px solid var(--green);
+    }
+
+    .team-card.pending {
+      border-left: 3px solid var(--pending);
+    }
+
+    .team-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    .team-name {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .status-badge {
+      font-size: 0.68rem;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+
+    .status-confirmed {
+      background: rgba(34, 197, 94, 0.15);
+      color: var(--green);
+    }
+
+    .status-pending {
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--pending);
+    }
+
+    .player-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .player-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    .player-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--border2);
+      flex-shrink: 0;
+    }
+
+    .player-item.captain .player-dot {
+      background: var(--accent);
+    }
+
+    .player-item.captain {
+      color: var(--text);
+    }
+
+    .captain-tag {
+      font-size: 0.65rem;
+      color: var(--accent);
+      border: 1px solid rgba(245, 166, 35, 0.3);
+      border-radius: 3px;
+      padding: 1px 5px;
+      margin-left: auto;
+    }
+
+    .verify-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .verify-inner {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-end;
+      flex-wrap: wrap;
+    }
+
+    .verify-inner .form-group {
+      flex: 1;
+      min-width: 140px;
+    }
+
+    .loading {
+      color: var(--muted);
+      font-size: 0.85rem;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .admin-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .admin-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .admin-team-name {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .admin-meta {
+      font-size: 0.78rem;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+
+    .admin-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      align-items: flex-end;
+      flex-shrink: 0;
+    }
+
+    .btn-sm {
+      padding: 6px 14px;
+      font-size: 0.78rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      border: 1px solid;
+      transition: background 0.2s;
+      font-weight: 500;
+    }
+
+    .btn-approve {
+      background: rgba(34, 197, 94, 0.1);
+      color: var(--green);
+      border-color: rgba(34, 197, 94, 0.3);
+    }
+
+    .btn-approve:hover {
+      background: rgba(34, 197, 94, 0.2);
+    }
+
+    .btn-edit {
+      background: rgba(245, 166, 35, 0.1);
+      color: var(--accent);
+      border-color: rgba(245, 166, 35, 0.3);
+    }
+
+    .btn-edit:hover {
+      background: rgba(245, 166, 35, 0.2);
+    }
+
+    .btn-del {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--red);
+      border-color: rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-del:hover {
+      background: rgba(239, 68, 68, 0.2);
+    }
+
+    .btn-reset {
+      background: rgba(139, 92, 246, 0.1);
+      color: #a78bfa;
+      border-color: rgba(139, 92, 246, 0.3);
+    }
+
+    .btn-reset:hover {
+      background: rgba(139, 92, 246, 0.2);
+    }
+
+    .code-pill {
+      display: inline-block;
+      background: rgba(34, 197, 94, 0.1);
+      color: var(--green);
+      font-family: monospace;
+      font-size: 0.8rem;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-top: 4px;
+      letter-spacing: 1px;
+    }
+
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 14px;
+      padding: 1.75rem;
+      width: 100%;
+      max-width: 480px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal h3 {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1.2rem;
+      margin-bottom: 1.25rem;
+      letter-spacing: 1px;
+    }
+
+    .modal-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .modal-footer {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: flex-end;
+      margin-top: 1.25rem;
+    }
+
+    .btn-secondary {
+      background: var(--surface2);
+      color: var(--muted);
+      border: 1px solid var(--border2);
+    }
+
+    .btn-secondary:hover {
+      color: var(--text);
+    }
+
+    .admin-login-wrap {
+      max-width: 360px;
+      margin: 3rem auto;
+    }
+
+    @media(max-width: 600px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero h1 {
+        font-size: 2rem;
+      }
+
+      .modal-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <nav>
+    <div class="nav-logo">⚡ BGMI COLLEGE CUP</div>
+    <div class="nav-tabs">
+      <button class="nav-tab active" onclick="showPage('register',this)">Register</button>
+      <button class="nav-tab" onclick="showPage('teams',this)">Teams</button>
+      <button class="nav-tab" onclick="showPage('admin',this)">Admin</button>
+    </div>
+  </nav>
+
+  <!-- REGISTER PAGE -->
+  <div class="page active" id="page-register">
+    <div class="hero">
+      <div class="hero-tag">BGMI · 4v4 SQUAD · 2025</div>
+      <h1>Register Your <span>Squad</span></h1>
+      <p>Fill in your details below. Your team stays Pending until the admin approves you.</p>
+    </div>
+    <div class="form-card">
+      <div class="section-label">Team Info</div>
+      <div class="form-grid">
+        <div class="form-group full">
+          <label>Team Name</label>
+          <input type="text" id="teamName" placeholder="e.g. PHANTOM SQUAD" maxlength="30">
+        </div>
+      </div>
+      <hr class="divider">
+      <div class="section-label">4 Players</div>
+      <div class="form-grid" id="playersGrid"></div>
+      <hr class="divider">
+      <div class="section-label">Contact</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Captain's WhatsApp Number</label>
+          <input type="tel" id="contactPhone" placeholder="9XXXXXXXXX">
+        </div>
+        <div class="form-group">
+          <label>College Roll No. (Captain)</label>
+          <input type="text" id="rollNo" placeholder="e.g. CSE2022001">
+        </div>
+      </div>
+      <div class="form-footer">
+        <button class="btn btn-primary" onclick="registerTeam()" id="regBtn">Register Team</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TEAMS PAGE -->
+  <div class="page" id="page-teams">
+    <div class="teams-header">
+      <h2>Registered Teams</h2>
+      <span class="badge-count" id="teamCount">0 teams</span>
+    </div>
+    <div class="verify-card">
+      <p style="font-size:0.8rem;color:var(--muted);margin-bottom:0.75rem;">Got a verification code from the admin?
+        Enter it here to confirm your team.</p>
+      <div class="verify-inner">
+        <div class="form-group">
+          <label>Team Name</label>
+          <input type="text" id="verifyTeamName" placeholder="Your exact team name">
+        </div>
+        <div class="form-group">
+          <label>Verification Code</label>
+          <input type="text" id="verifyCode" placeholder="BGMI-XXXX" style="text-transform:uppercase;">
+        </div>
+        <button class="btn btn-primary" onclick="doVerify()" style="flex-shrink:0;">Verify</button>
+      </div>
+    </div>
+    <div id="teamsContainer">
+      <div class="loading">Loading teams...</div>
+    </div>
+  </div>
+
+  <!-- ADMIN PAGE -->
+  <div class="page" id="page-admin">
+    <div id="adminLoginWrap" class="admin-login-wrap">
+      <div class="form-card">
+        <h2 style="font-family:'Rajdhani',sans-serif;font-size:1.3rem;margin-bottom:1.5rem;text-align:center;">Admin
+          Login</h2>
+        <div class="form-group" style="margin-bottom:1rem;">
+          <label>Password</label>
+          <input type="password" id="adminPass" placeholder="Enter admin password"
+            onkeydown="if(event.key==='Enter')doAdminLogin()">
+        </div>
+        <button class="btn btn-primary" onclick="doAdminLogin()" style="width:100%;">Login</button>
+      </div>
+    </div>
+    <div id="adminPanel" style="display:none;">
+      <div class="teams-header">
+        <h2>Team Management</h2>
+        <button class="btn btn-danger" onclick="doAdminLogout()"
+          style="font-size:0.8rem;padding:7px 14px;">Logout</button>
+      </div>
+      <p style="color:var(--muted);font-size:0.82rem;margin-bottom:1.5rem;">Approve teams to generate a code. Share it
+        with the captain via WhatsApp. You can also edit, reset, or delete any team.</p>
+      <div id="adminTeamsContainer">
+        <div class="loading">Loading...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EDIT MODAL -->
+  <div class="modal-overlay" id="editModal">
+    <div class="modal">
+      <h3>Edit Team</h3>
+      <input type="hidden" id="editOldName">
+      <div class="form-group" style="margin-bottom:0.75rem;">
+        <label>Team Name</label>
+        <input type="text" id="editTeamName">
+      </div>
+      <div class="modal-grid" id="editPlayersGrid"></div>
+      <div class="modal-grid">
+        <div class="form-group"><label>Phone</label><input type="text" id="editPhone"></div>
+        <div class="form-group"><label>Roll No</label><input type="text" id="editRoll"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveEdit()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast">
+    <div class="toast-dot"></div><span id="toastMsg"></span>
+  </div>
+
+  <script>
+    // ── UPDATED SCRIPT URL ──
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyu4VEYlUUe6Y6Q49MU1yfGep_79ka5vAOiL-3tMR3-BBZH4tv85XpChYESeIfTgqUA/exec';
+    const ADMIN_PASS = 'bgmi2025';
+    let isAdmin = false;
+
+    // Build player input fields on load
+    (function () {
+      const g = document.getElementById('playersGrid');
+      if (!g) return;
+      for (let i = 1; i <= 4; i++) {
+        g.innerHTML += `
+        <div class="form-group">
+          <label>${i === 1 ? 'Player 1 (Captain)' : 'Player ' + i}</label>
+          <input type="text" id="p${i}" placeholder="In-game name" maxlength="25">
+        </div>`;
+      }
+    })();
+
+    // ── NAVIGATION ───────────────────────────────
+    function showPage(page, btn) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+      document.getElementById('page-' + page).classList.add('active');
+      if (btn) btn.classList.add('active');
+      if (page === 'teams') loadTeams();
+      if (page === 'admin' && isAdmin) loadAdminTeams();
+    }
+
+    // ── TOAST ────────────────────────────────────
+    function toast(msg, type = 'success') {
+      const t = document.getElementById('toast');
+      document.getElementById('toastMsg').textContent = msg;
+      t.className = 'show ' + type;
+      clearTimeout(t._t);
+      t._t = setTimeout(() => t.className = '', 3800);
+    }
+
+    // ── REGISTER ─────────────────────────────────
+    async function registerTeam() {
+      const teamName = document.getElementById('teamName').value.trim();
+      const players = [1, 2, 3, 4].map(i => document.getElementById('p' + i).value.trim());
+      const phone = document.getElementById('contactPhone').value.trim();
+      const roll = document.getElementById('rollNo').value.trim();
+
+      if (!teamName) { toast('Enter a team name', 'error'); return; }
+      if (players.some(p => !p)) { toast('Enter all 4 player names', 'error'); return; }
+      if (!phone) { toast('Enter captain WhatsApp number', 'error'); return; }
+
+      const btn = document.getElementById('regBtn');
+      btn.disabled = true;
+      btn.textContent = 'Registering...';
+
+      try {
+        const res = await fetch(SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'register', teamName, players, phone, roll, timestamp: new Date().toISOString() })
+        });
+        const data = await res.json();
+        if (data.success) {
+          toast('Team registered! Waiting for admin approval.', 'success');
+          document.getElementById('teamName').value = '';
+          document.getElementById('contactPhone').value = '';
+          document.getElementById('rollNo').value = '';
+          [1, 2, 3, 4].forEach(i => document.getElementById('p' + i).value = '');
+        } else {
+          toast(data.message || 'Registration failed', 'error');
+        }
+      } catch (e) {
+        console.error(e);
+        toast('Error connecting to Sheet. Check Script URL or "Illegal ID" in backend.', 'error');
+      }
+
+      btn.disabled = false;
+      btn.textContent = 'Register Team';
+    }
+
+    // ── LOAD PUBLIC TEAMS ─────────────────────────
+    async function loadTeams() {
+      const container = document.getElementById('teamsContainer');
+      container.innerHTML = '<div class="loading">Fetching teams...</div>';
+      try {
+        const res = await fetch(SCRIPT_URL + '?action=getTeams');
+        const data = await res.json();
+        const teams = data.teams || [];
+
+        document.getElementById('teamCount').textContent = teams.length + ' team' + (teams.length !== 1 ? 's' : '');
+
+        if (!teams.length) {
+          container.innerHTML = '<div class="loading">No teams registered yet. Be the first!</div>';
+          return;
+        }
+
+        container.innerHTML =
+          '<div class="teams-grid">' +
+          teams.map(t => `
+          <div class="team-card ${t.confirmed ? 'confirmed' : 'pending'}">
+            <div class="team-card-header">
+              <span class="team-name">${esc(t.teamName)}</span>
+              <span class="status-badge ${t.confirmed ? 'status-confirmed' : 'status-pending'}">${t.confirmed ? 'Confirmed' : 'Pending'}</span>
+            </div>
+            <div class="player-list">
+              ${t.players.map((p, i) => `
+                <div class="player-item ${i === 0 ? 'captain' : ''}">
+                  <div class="player-dot"></div>
+                  <span>${esc(p)}</span>
+                  ${i === 0 ? '<span class="captain-tag">Captain</span>' : ''}
+                </div>`).join('')}
+            </div>
+          </div>`).join('') +
+          '</div>';
+      } catch (e) {
+        console.error(e);
+        container.innerHTML = '<div class="loading" style="color:var(--red)">Connection Error: The backend returned an "Illegal ID" error. Update yourgetSheet() code in Apps Script.</div>';
+      }
+    }
+
+    // ── VERIFY TEAM ───────────────────────────────
+    async function doVerify() {
+      const team = document.getElementById('verifyTeamName').value.trim();
+      const code = document.getElementById('verifyCode').value.trim().toUpperCase();
+      if (!team || !code) { toast('Enter both team name and code', 'error'); return; }
+      try {
+        const res = await fetch(`${SCRIPT_URL}?action=verify&team=${encodeURIComponent(team)}&code=${encodeURIComponent(code)}`);
+        const data = await res.json();
+        if (data.success) {
+          toast('Team verified and confirmed!', 'success');
+          document.getElementById('verifyTeamName').value = '';
+          document.getElementById('verifyCode').value = '';
+          loadTeams();
+        } else {
+          toast(data.message || 'Invalid code', 'error');
+        }
+      } catch (e) { toast('Connection error', 'error'); }
+    }
+
+    // ── ADMIN LOGIN ───────────────────────────────
+    function doAdminLogin() {
+      const pass = document.getElementById('adminPass').value;
+      if (pass === ADMIN_PASS) {
+        isAdmin = true;
+        document.getElementById('adminLoginWrap').style.display = 'none';
+        document.getElementById('adminPanel').style.display = 'block';
+        loadAdminTeams();
+      } else {
+        toast('Wrong password', 'error');
+      }
+    }
+
+    function doAdminLogout() {
+      isAdmin = false;
+      document.getElementById('adminLoginWrap').style.display = 'block';
+      document.getElementById('adminPanel').style.display = 'none';
+      document.getElementById('adminPass').value = '';
+    }
+
+    // ── ADMIN: LOAD ALL TEAMS ─────────────────────
+    async function loadAdminTeams() {
+      const container = document.getElementById('adminTeamsContainer');
+      container.innerHTML = '<div class="loading">Loading...</div>';
+      try {
+        const res = await fetch(`${SCRIPT_URL}?action=getAllTeams&adminKey=${ADMIN_PASS}`);
+        const data = await res.json();
+        renderAdminTeams(data.teams || []);
+      } catch (e) {
+        container.innerHTML = '<div class="loading" style="color:var(--red)">Illegal ID error in Apps Script.</div>';
+      }
+    }
+
+    function renderAdminTeams(teams) {
+      const c = document.getElementById('adminTeamsContainer');
+      if (!teams.length) { c.innerHTML = '<div class="loading">No teams registered yet.</div>'; return; }
+
+      c.innerHTML = teams.map(t => `
+      <div class="admin-card">
+        <div class="admin-row">
+          <div style="flex:1;min-width:0;">
+            <div class="admin-team-name">
+              ${esc(t.teamName)}
+              <span class="status-badge ${t.confirmed ? 'status-confirmed' : 'status-pending'}" style="font-size:0.65rem;margin-left:6px;">${t.status}</span>
+            </div>
+            <div class="admin-meta">
+              ${t.players.map((p, i) => `${i === 0 ? '👑' : '👤'} ${esc(p)}`).join(' &nbsp; ')}<br>
+              📞 ${esc(t.phone || '—')} &nbsp;|&nbsp; Roll: ${esc(t.roll || '—')}
+              ${t.code ? `<br><span class="code-pill">Code: ${esc(t.code)}</span>` : ''}
+            </div>
+          </div>
+          <div class="admin-actions">
+            ${!t.confirmed ? `<button class="btn-sm btn-approve" onclick="approveTeam('${esc(t.teamName)}')">Approve</button>` : ''}
+            <button class="btn-sm btn-edit" onclick='openEditModal(${JSON.stringify(t)})'>Edit</button>
+            <button class="btn-sm btn-reset" onclick="resetStatus('${esc(t.teamName)}')">Reset</button>
+            <button class="btn-sm btn-del" onclick="deleteTeam('${esc(t.teamName)}')">Delete</button>
+          </div>
+        </div>
+      </div>`).join('');
+    }
+
+    // ── ADMIN: APPROVE ────────────────────────────
+    async function approveTeam(name) {
+      try {
+        const res = await fetch(`${SCRIPT_URL}?action=approve&team=${encodeURIComponent(name)}&adminKey=${ADMIN_PASS}`);
+        const data = await res.json();
+        if (data.success) {
+          toast(`Code: ${data.code} — share with the captain!`, 'success');
+          loadAdminTeams();
+        } else toast(data.message, 'error');
+      } catch (e) { toast('Error approving team', 'error'); }
+    }
+
+    // ── ADMIN: DELETE ─────────────────────────────
+    async function deleteTeam(name) {
+      if (!confirm(`Delete "${name}"? This cannot be undone.`)) return;
+      try {
+        const res = await fetch(`${SCRIPT_URL}?action=deleteTeam&team=${encodeURIComponent(name)}&adminKey=${ADMIN_PASS}`);
+        const data = await res.json();
+        if (data.success) { toast(`"${name}" deleted.`, 'success'); loadAdminTeams(); }
+        else toast(data.message, 'error');
+      } catch (e) { toast('Error deleting team', 'error'); }
+    }
+
+    // ── ADMIN: RESET STATUS ───────────────────────
+    async function resetStatus(name) {
+      if (!confirm(`Reset "${name}" back to Pending and clear their code?`)) return;
+      try {
+        const res = await fetch(`${SCRIPT_URL}?action=resetStatus&team=${encodeURIComponent(name)}&adminKey=${ADMIN_PASS}`);
+        const data = await res.json();
+        if (data.success) { toast(`"${name}" reset to Pending.`, 'success'); loadAdminTeams(); }
+        else toast(data.message, 'error');
+      } catch (e) { toast('Error resetting team', 'error'); }
+    }
+
+    // ── ADMIN: EDIT MODAL ─────────────────────────
+    function openEditModal(t) {
+      document.getElementById('editOldName').value = t.teamName;
+      document.getElementById('editTeamName').value = t.teamName;
+      document.getElementById('editPhone').value = t.phone || '';
+      document.getElementById('editRoll').value = t.roll || '';
+
+      const g = document.getElementById('editPlayersGrid');
+      g.innerHTML = t.players.map((p, i) => `
+      <div class="form-group">
+        <label>${i === 0 ? 'Player 1 (Captain)' : 'Player ' + (i + 1)}</label>
+        <input type="text" id="ep${i}" value="${esc(p)}" maxlength="25">
+      </div>`).join('');
+
+      document.getElementById('editModal').classList.add('open');
+    }
+
+    function closeModal() {
+      document.getElementById('editModal').classList.remove('open');
+    }
+
+    async function saveEdit() {
+      const oldName = document.getElementById('editOldName').value;
+      const newName = document.getElementById('editTeamName').value.trim();
+      const players = [0, 1, 2, 3].map(i => document.getElementById('ep' + i).value.trim());
+      const phone = document.getElementById('editPhone').value.trim();
+      const roll = document.getElementById('editRoll').value.trim();
+
+      if (!newName) { toast('Team name cannot be empty', 'error'); return; }
+      if (players.some(p => !p)) { toast('All 4 player names are required', 'error'); return; }
+
+      try {
+        const res = await fetch(SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'editTeam', adminKey: ADMIN_PASS, oldTeamName: oldName, newTeamName: newName, players, phone, roll })
+        });
+        const data = await res.json();
+        if (data.success) {
+          toast('Team updated successfully!', 'success');
+          closeModal();
+          loadAdminTeams();
+        } else toast(data.message || 'Update failed', 'error');
+      } catch (e) { toast('Connection error', 'error'); }
+    }
+
+    // ── UTILITY ───────────────────────────────────
+    function esc(s) {
+      return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    // Load teams on start
+    loadTeams();
+  </script>
+</body>
+
+</html>
