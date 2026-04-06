@@ -1,773 +1,479 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <link rel="icon" type="image/jpg" href="icon.jpg">
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BGMI College Tournament</title>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@400;500&display=swap"
-    rel="stylesheet">
-  <style>
-    :root {
-      --bg: #0a0c10;
-      --surface: #111318;
-      --surface2: #181c24;
-      --border: rgba(255, 255, 255, 0.08);
-      --border2: rgba(255, 255, 255, 0.14);
-      --accent: #f5a623;
-      --text: #f0f0f0;
-      --muted: #8a8fa0;
-      --green: #22c55e;
-      --red: #ef4444;
-      --blue: #3b82f6;
-      --gold: #ffd700;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BGMI College Tournament</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<!-- Supabase SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- Uropay Embed -->
+<script src="https://cdn.uropay.me/uropay-embed.min.js"></script>
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+<style>
+  :root {
+    --bg: #0a0c10;
+    --surface: #111318;
+    --surface2: #181c24;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.14);
+    --accent: #f5a623;
+    --text: #f0f0f0;
+    --muted: #8a8fa0;
+    --green: #22c55e;
+    --red: #ef4444;
+    --blue: #3b82f6;
+    --gold: #ffd700;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; overflow-x: hidden; }
 
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Inter', sans-serif;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
+  nav { background: var(--surface); border-bottom: 1px solid var(--border2); padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 60px; position: sticky; top: 0; z-index: 100; }
+  .nav-logo { font-family: 'Rajdhani', sans-serif; font-size: 1.4rem; font-weight: 700; color: var(--accent); letter-spacing: 2px; }
+  .nav-tabs { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; }
+  .nav-tab { background: none; border: none; color: var(--muted); font-family: 'Inter', sans-serif; font-size: 0.85rem; padding: 6px 14px; border-radius: 6px; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+  .nav-tab:hover { color: var(--text); background: var(--surface2); }
+  .nav-tab.active { color: var(--accent); background: rgba(245,166,35,0.1); }
 
-    nav {
-      background: var(--surface);
-      border-bottom: 1px solid var(--border2);
-      padding: 0 2rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      height: 60px;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
+  .page { display: none; padding: 2rem; max-width: 900px; margin: 0 auto; }
+  .page.active { display: block; }
 
-    .nav-logo {
-      font-family: 'Rajdhani', sans-serif;
-      font-size: 1.4rem;
-      font-weight: 700;
-      color: var(--accent);
-      letter-spacing: 2px;
-    }
+  .hero { text-align: center; padding: 2rem 0 1.5rem; }
+  .hero-tag { display: inline-block; background: rgba(245,166,35,0.15); color: var(--accent); font-size: 0.75rem; font-family: 'Rajdhani', sans-serif; letter-spacing: 3px; padding: 4px 12px; border-radius: 4px; margin-bottom: 1rem; border: 1px solid rgba(245,166,35,0.3); }
+  .hero h1 { font-family: 'Rajdhani', sans-serif; font-size: 2.8rem; font-weight: 700; line-height: 1.1; margin-bottom: 0.5rem; }
+  .hero h1 span { color: var(--accent); }
+  .hero p { color: var(--muted); font-size: 0.9rem; }
 
-    .nav-tabs {
-      display: flex;
-      gap: 4px;
-      overflow-x: auto;
-      scrollbar-width: none;
-    }
+  /* LEADERBOARD */
+  .leaderboard-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; margin-top: 1rem; }
+  .table-wrap { width: 100%; overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; text-align: left; }
+  th { padding: 1rem 1.5rem; font-family: 'Rajdhani', sans-serif; font-size: 0.85rem; color: var(--muted); text-transform: uppercase; border-bottom: 1px solid var(--border); }
+  td { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); font-size: 0.95rem; }
+  .rank-cell { font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 1.1rem; width: 60px; }
+  .points-cell { font-family: 'Rajdhani', sans-serif; font-weight: 700; color: var(--accent); font-size: 1.1rem; text-align: right; }
 
-    .nav-tab {
-      background: none;
-      border: none;
-      color: var(--muted);
-      font-family: 'Inter', sans-serif;
-      font-size: 0.85rem;
-      padding: 6px 14px;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: all 0.2s;
-      white-space: nowrap;
-    }
+  /* FORM UI */
+  .form-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; margin-top: 1.5rem; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group.full { grid-column: 1 / -1; }
+  label { font-size: 0.78rem; color: var(--muted); letter-spacing: 0.5px; text-transform: uppercase; }
+  input { background: var(--surface2); border: 1px solid var(--border2); border-radius: 8px; padding: 10px 14px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 0.9rem; outline: none; transition: border-color 0.2s; width: 100%; }
+  input:focus { border-color: var(--accent); }
+  input[type="file"] { padding: 8px; font-size: 0.8rem; border: 1px dashed var(--border2); cursor: pointer; }
+  .section-label { font-family: 'Rajdhani', sans-serif; font-size: 0.85rem; letter-spacing: 2px; color: var(--accent); margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 22px; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 500; cursor: pointer; border: none; transition: all 0.2s; text-decoration: none; }
+  .btn-primary { background: var(--accent); color: #000; }
+  .btn-danger { background: rgba(239,68,68,0.1); color: var(--red); border: 1px solid rgba(239,68,68,0.2); }
+  .btn-danger:hover { background: var(--red); color: white; }
+  .btn-success { background: var(--green); color: #000; }
+  .btn-blue { background: var(--blue); color: white; }
+  .btn-sm { padding: 6px 12px; font-size: 0.75rem; }
 
-    .nav-tab.active {
-      color: var(--accent);
-      background: rgba(245, 166, 35, 0.1);
-    }
+  .uropay-wrapper { margin: 1.5rem 0; padding: 1.5rem; background: rgba(245,166,35,0.05); border-radius: 12px; border: 1px dashed var(--accent); text-align: center; }
+  .uropay-btn { display: inline-block; background: #5263FF; color: white; padding: 12px 24px; border-radius: 8px; font-weight: 600; text-decoration: none; transition: 0.3s; }
 
-    .page {
-      display: none;
-      padding: 2rem;
-      max-width: 900px;
-      margin: 0 auto;
-    }
+  /* TEAM CARDS */
+  .team-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; transition: transform 0.2s, border-color 0.2s; cursor: pointer; }
+  .team-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .status-badge { font-size: 0.7rem; padding: 2px 8px; border-radius: 4px; font-weight: 600; text-transform: uppercase; }
+  .status-confirmed { background: rgba(34,197,94,0.1); color: var(--green); }
+  .status-pending { background: rgba(245,158,11,0.1); color: var(--accent); }
+  .status-approved { background: rgba(59, 130, 246, 0.1); color: var(--blue); }
 
-    .page.active {
-      display: block;
-    }
+  .team-players { display: none; margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border2); animation: fadeIn 0.3s forwards; }
+  .team-card.expanded .team-players { display: block; }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
 
-    .hero {
-      text-align: center;
-      padding: 2rem 0 1.5rem;
-    }
+  .screenshot-thumbnail { width: 100%; max-height: 250px; object-fit: contain; margin-top: 10px; border-radius: 8px; border: 1px solid var(--border2); background: #000; cursor: zoom-in; transition: 0.2s; }
 
-    .hero-tag {
-      display: inline-block;
-      background: rgba(245, 166, 35, 0.15);
-      color: var(--accent);
-      font-size: 0.75rem;
-      font-family: 'Rajdhani', sans-serif;
-      letter-spacing: 3px;
-      padding: 4px 12px;
-      border-radius: 4px;
-      margin-bottom: 1rem;
-      border: 1px solid rgba(245, 166, 35, 0.3);
-    }
+  #toast { position: fixed; bottom: 2rem; right: 2rem; background: var(--surface); border: 1px solid var(--border2); border-radius: 10px; padding: 14px 20px; font-size: 0.85rem; display: none; z-index: 999; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+  #toast.show { display: flex; }
+  .loading { color: var(--muted); font-size: 0.85rem; text-align: center; padding: 3rem; }
 
-    .hero h1 {
-      font-family: 'Rajdhani', sans-serif;
-      font-size: 2.8rem;
-      font-weight: 700;
-      line-height: 1.1;
-      margin-bottom: 0.5rem;
-    }
+  /* MODALS */
+  .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; backdrop-filter: blur(5px); }
+  .modal-content { background: var(--surface); border: 1px solid var(--border2); border-radius: 16px; width: 100%; max-width: 500px; padding: 2rem; position: relative; }
 
-    .hero h1 span {
-      color: var(--accent);
-    }
+  /* IMAGE LIGHTBOX PREVIEW */
+  .lightbox-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 2000; padding: 2rem; }
+  .lightbox-content { max-width: 90%; max-height: 80vh; border-radius: 8px; box-shadow: 0 0 50px rgba(0,0,0,0.8); }
+  .lightbox-close { position: absolute; top: 2rem; right: 2rem; background: #fff; color: #000; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; border: none; font-size: 1.2rem; }
 
-    .hero p {
-      color: var(--muted);
-      font-size: 0.9rem;
-    }
-
-    /* TABLE & LEADERBOARD */
-    .leaderboard-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      overflow: hidden;
-      margin-top: 1rem;
-    }
-
-    .table-wrap {
-      width: 100%;
-      overflow-x: auto;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: left;
-    }
-
-    th {
-      padding: 1rem 1.5rem;
-      font-family: 'Rajdhani', sans-serif;
-      font-size: 0.85rem;
-      color: var(--muted);
-      text-transform: uppercase;
-      border-bottom: 1px solid var(--border);
-    }
-
-    td {
-      padding: 1.25rem 1.5rem;
-      border-bottom: 1px solid var(--border);
-      font-size: 0.95rem;
-    }
-
-    .rank-cell {
-      font-family: 'Rajdhani', sans-serif;
-      font-weight: 700;
-      font-size: 1.1rem;
-      width: 60px;
-    }
-
-    .points-cell {
-      font-family: 'Rajdhani', sans-serif;
-      font-weight: 700;
-      color: var(--accent);
-      font-size: 1.1rem;
-      text-align: right;
-    }
-
-    /* FORM UI */
-    .form-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 2rem;
-      margin-top: 1.5rem;
-    }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .form-group.full {
-      grid-column: 1 / -1;
-    }
-
-    label {
-      font-size: 0.78rem;
-      color: var(--muted);
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-    }
-
-    input {
-      background: var(--surface2);
-      border: 1px solid var(--border2);
-      border-radius: 8px;
-      padding: 10px 14px;
-      color: var(--text);
-      font-family: 'Inter', sans-serif;
-      font-size: 0.9rem;
-      outline: none;
-      transition: border-color 0.2s;
-      width: 100%;
-    }
-
-    input:focus {
-      border-color: var(--accent);
-    }
-
-    .section-label {
-      font-family: 'Rajdhani', sans-serif;
-      font-size: 0.85rem;
-      letter-spacing: 2px;
-      color: var(--accent);
-      margin-bottom: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .section-label::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: var(--border);
-    }
-
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 10px 22px;
-      border-radius: 8px;
-      font-family: 'Inter', sans-serif;
-      font-size: 0.85rem;
-      font-weight: 500;
-      cursor: pointer;
-      border: none;
-      transition: all 0.2s;
-    }
-
-    .btn-primary {
-      background: var(--accent);
-      color: #000;
-    }
-
-    .btn-danger {
-      background: rgba(239, 68, 68, 0.1);
-      color: var(--red);
-      border: 1px solid rgba(239, 68, 68, 0.2);
-    }
-
-    .btn-danger:hover {
-      background: var(--red);
-      color: white;
-    }
-
-    .btn-success {
-      background: var(--green);
-      color: #000;
-    }
-
-    .btn-blue {
-      background: var(--blue);
-      color: white;
-    }
-
-    .btn-sm {
-      padding: 6px 12px;
-      font-size: 0.75rem;
-    }
-
-    /* TEAM CARDS */
-    .team-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1.25rem;
-      margin-bottom: 1rem;
-      transition: transform 0.2s, border-color 0.2s;
-      cursor: pointer;
-    }
-
-    .team-card:hover {
-      border-color: var(--accent);
-      transform: translateY(-2px);
-    }
-
-    .status-badge {
-      font-size: 0.7rem;
-      padding: 2px 8px;
-      border-radius: 4px;
-      font-weight: 600;
-      text-transform: uppercase;
-    }
-
-    .status-confirmed {
-      background: rgba(34, 197, 94, 0.1);
-      color: var(--green);
-    }
-
-    .status-pending {
-      background: rgba(245, 158, 11, 0.1);
-      color: var(--accent);
-    }
-
-    .status-approved {
-      background: rgba(59, 130, 246, 0.1);
-      color: var(--blue);
-    }
-
-    .team-players {
-      display: none;
-      margin-top: 12px;
-      padding-top: 12px;
-      border-top: 1px dashed var(--border2);
-      animation: fadeIn 0.3s forwards;
-    }
-
-    .team-card.expanded .team-players {
-      display: block;
-    }
-
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(-5px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    #toast {
-      position: fixed;
-      bottom: 2rem;
-      right: 2rem;
-      background: var(--surface);
-      border: 1px solid var(--border2);
-      border-radius: 10px;
-      padding: 14px 20px;
-      font-size: 0.85rem;
-      display: none;
-      z-index: 999;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    }
-
-    #toast.show {
-      display: flex;
-    }
-
-    .loading {
-      color: var(--muted);
-      font-size: 0.85rem;
-      text-align: center;
-      padding: 3rem;
-    }
-
-    /* Modal for Editing */
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.8);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      padding: 1rem;
-    }
-
-    .modal-content {
-      background: var(--surface);
-      border: 1px solid var(--border2);
-      border-radius: 16px;
-      width: 100%;
-      max-width: 500px;
-      padding: 2rem;
-      position: relative;
-    }
-
-    @media(max-width: 600px) {
-      .form-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .hero h1 {
-        font-size: 2.2rem;
-      }
-
-      .hide-mobile {
-        display: none;
-      }
-    }
-  </style>
+  @media(max-width: 600px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .hero h1 { font-size: 2.2rem; }
+    .hide-mobile { display: none; }
+    .lightbox-overlay { padding: 1rem; }
+    .lightbox-content { max-width: 100%; }
+  }
+</style>
 </head>
-
 <body>
 
-  <nav>
-    <div class="nav-logo">⚡ BGMI CUP</div>
-    <div class="nav-tabs">
-      <button class="nav-tab active" onclick="showPage('register',this)">Register</button>
-      <button class="nav-tab" onclick="showPage('leaderboard',this)">Leaderboard</button>
-      <button class="nav-tab" onclick="showPage('teams',this)">Teams</button>
-      <button class="nav-tab" onclick="showPage('admin',this)">Admin</button>
-    </div>
-  </nav>
+<nav>
+  <div class="nav-logo">⚡ BGMI CUP</div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPage('register',this)">Register</button>
+    <button class="nav-tab" onclick="showPage('leaderboard',this)">Leaderboard</button>
+    <button class="nav-tab" onclick="showPage('teams',this)">Teams</button>
+    <button class="nav-tab" onclick="showPage('admin',this)">Admin</button>
+  </div>
+</nav>
 
-  <!-- REGISTER PAGE -->
-  <div class="page active" id="page-register">
-    <div class="hero">
-      <div class="hero-tag">BGMI · 2025</div>
-      <h1>Register Your <span>Squad</span></h1>
-      <p>Fill in details to secure your spot in the tournament.</p>
+<!-- REGISTER PAGE -->
+<div class="page active" id="page-register">
+  <div class="hero">
+    <div class="hero-tag">BGMI · 2025</div>
+    <h1>Register Your <span>Squad</span></h1>
+    <p>Fee: ₹40. Follow the two steps below.</p>
+  </div>
+
+  <div class="form-card">
+    <div class="section-label">Team Info</div>
+    <div class="form-group full" style="margin-bottom: 1rem;"><label>Team Name</label><input type="text" id="teamName" placeholder="e.g. PHANTOM SQUAD"></div>
+    <div class="section-label">Players (IGN)</div>
+    <div class="form-grid" id="playersGrid"></div>
+    <hr style="margin:1.5rem 0; border:0; border-top:1px solid var(--border);">
+    <div class="section-label">Contact Info</div>
+    <div class="form-grid">
+      <div class="form-group"><label>WhatsApp No.</label><input type="tel" id="contactPhone" placeholder="91XXXXXXXX"></div>
+      <div class="form-group"><label>Roll No.</label><input type="text" id="rollNo" placeholder="CSE2022XXX"></div>
     </div>
+    <div class="uropay-wrapper">
+      <p style="font-size: 0.85rem; color: var(--text); margin-bottom: 1rem; font-weight: 600;">Step 1: Pay Entry Fee</p>
+      <a href="#" class="uropay-btn" data-uropay-api-key="IMXKHDQB31N11811" data-uropay-button-id="CHARLIE273463" data-uropay-environment="LIVE" data-uropay-amount="40">Pay with Uropay</a>
+    </div>
+    <div class="form-group full" style="margin-top: 1rem;">
+      <label>Step 2: Upload Payment Screenshot</label>
+      <input type="file" id="screenshotInput" accept="image/*">
+    </div>
+    <div style="display:flex; justify-content:flex-end; margin-top:2rem;">
+      <button class="btn btn-primary" onclick="registerTeam()" id="regBtn" style="padding: 14px 40px; font-weight: 700;">Complete Registration</button>
+    </div>
+  </div>
+</div>
+
+<!-- LEADERBOARD PAGE -->
+<div class="page" id="page-leaderboard">
+  <div class="hero"><h1>Live <span>Standings</span></h1></div>
+  <div class="leaderboard-card">
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Rank</th><th>Team</th><th class="hide-mobile">Kills</th><th class="hide-mobile">Placement</th><th style="text-align:right;">Total</th></tr></thead>
+        <tbody id="leaderboardBody"></tbody>
+      </table>
+      <div id="leaderboardStatus"></div>
+    </div>
+  </div>
+</div>
+
+<!-- TEAMS PAGE -->
+<div class="page" id="page-teams">
+  <div class="hero">
+    <h1>Registered <span>Teams</span></h1>
+    <p id="teamCount">Syncing...</p>
+    <p style="font-size:0.75rem; color:var(--muted); margin-top:0.5rem;">Click a card to see player names.</p>
+  </div>
+  <div id="teamsContainer"></div>
+</div>
+
+<!-- ADMIN PAGE -->
+<div class="page" id="page-admin">
+  <div id="adminLoginWrap" style="max-width:400px; margin:4rem auto;">
     <div class="form-card">
-      <div class="section-label">Team Info</div>
-      <div class="form-group full" style="margin-bottom: 1rem;"><label>Team Name</label><input type="text" id="teamName"
-          placeholder="e.g. PHANTOM SQUAD"></div>
-      <div class="section-label">Players</div>
-      <div class="form-grid" id="playersGrid"></div>
-      <hr style="margin:1.5rem 0; border:0; border-top:1px solid var(--border);">
-      <div class="section-label">Contact</div>
-      <div class="form-grid">
-        <div class="form-group"><label>WhatsApp No.</label><input type="tel" id="contactPhone" placeholder="91XXXXXXXX">
-        </div>
-        <div class="form-group"><label>Roll No.</label><input type="text" id="rollNo" placeholder="CSE2022XXX"></div>
-      </div>
-      <div style="display:flex; justify-content:flex-end; margin-top:1.5rem;">
-        <button class="btn btn-primary" onclick="registerTeam()" id="regBtn">Register Team</button>
-      </div>
+      <h2 style="text-align:center; margin-bottom:1.5rem;">Admin Access</h2>
+      <input type="password" id="adminPass" placeholder="Enter Password" style="margin-bottom:1rem;">
+      <button class="btn btn-primary" style="width:100%;" onclick="doAdminLogin()">Login</button>
     </div>
   </div>
-
-  <!-- LEADERBOARD PAGE -->
-  <div class="page" id="page-leaderboard">
-    <div class="hero">
-      <h1>Live <span>Standings</span></h1>
-    </div>
-    <div class="leaderboard-card">
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Rank</th>
-              <th>Team</th>
-              <th class="hide-mobile">Kills</th>
-              <th class="hide-mobile">Placement</th>
-              <th style="text-align:right;">Total</th>
-            </tr>
-          </thead>
-          <tbody id="leaderboardBody"></tbody>
-        </table>
-        <div id="leaderboardStatus"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- TEAMS PAGE -->
-  <div class="page" id="page-teams">
-    <div class="hero">
-      <h1>Registered <span>Teams</span></h1>
-      <p id="teamCount">Updating list...</p>
-      <p style="font-size:0.75rem; color:var(--muted); margin-top:0.5rem;">Click on a team card to view the squad
-        members.</p>
-    </div>
-    <div id="teamsContainer"></div>
-  </div>
-
-  <!-- ADMIN PAGE -->
-  <div class="page" id="page-admin">
-    <div id="adminLoginWrap" style="max-width:400px; margin:4rem auto;">
-      <div class="form-card">
-        <h2 style="text-align:center; margin-bottom:1.5rem;">Admin Access</h2>
-        <input type="password" id="adminPass" placeholder="Enter Password" style="margin-bottom:1rem;">
-        <button class="btn btn-primary" style="width:100%;" onclick="doAdminLogin()">Login</button>
-      </div>
-    </div>
-    <div id="adminPanel" style="display:none;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
-        <h2>Admin Dashboard</h2>
+  <div id="adminPanel" style="display:none;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
+      <h2>Admin Dashboard</h2>
+      <div style="display:flex; gap:10px;">
+        <button class="btn btn-blue btn-sm" onclick="loadAdminTeams()">Refresh</button>
         <button class="btn btn-danger btn-sm" onclick="doAdminLogout()">Logout</button>
       </div>
-      <div id="adminTeamsContainer"></div>
+    </div>
+    <div id="adminTeamsContainer"></div>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal-content">
+    <h3 style="margin-bottom:1rem; font-family:Rajdhani;">Edit Team Details</h3>
+    <div class="form-group" style="margin-bottom:0.8rem;"><label>Team Name</label><input type="text" id="editTeamName"></div>
+    <div id="editPlayersGrid" style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; margin-bottom:0.8rem;"></div>
+    <div class="form-grid" style="margin-bottom:1rem;">
+      <div class="form-group"><label>WhatsApp</label><input type="tel" id="editPhone"></div>
+      <div class="form-group"><label>Roll No</label><input type="text" id="editRoll"></div>
+    </div>
+    <div style="display:flex; gap:0.5rem; justify-content:flex-end;">
+      <button class="btn btn-danger btn-sm" onclick="closeEditModal()">Cancel</button>
+      <button class="btn btn-primary btn-sm" id="updateBtn" onclick="updateTeamData()">Update Squad</button>
     </div>
   </div>
+</div>
 
-  <!-- Modal for Admin Edit -->
-  <div class="modal-overlay" id="editModal">
-    <div class="modal-content">
-      <h3 style="margin-bottom:1rem; font-family:Rajdhani;">Edit Team Details</h3>
-      <div class="form-group" style="margin-bottom:0.8rem;"><label>Team Name</label><input type="text"
-          id="editTeamName"></div>
-      <div id="editPlayersGrid" style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; margin-bottom:0.8rem;">
-      </div>
-      <div class="form-grid" style="margin-bottom:1rem;">
-        <div class="form-group"><label>WhatsApp</label><input type="tel" id="editPhone"></div>
-        <div class="form-group"><label>Roll No</label><input type="text" id="editRoll"></div>
-      </div>
-      <div style="display:flex; gap:0.5rem; justify-content:flex-end;">
-        <button class="btn btn-danger btn-sm" onclick="closeEditModal()">Cancel</button>
-        <button class="btn btn-primary btn-sm" id="updateBtn" onclick="updateTeamData()">Update Squad</button>
-      </div>
+<!-- Delete Confirmation Modal -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal-content" style="text-align:center;">
+    <h3 style="color:var(--red); margin-bottom:1rem;">Confirm Deletion</h3>
+    <p id="deleteMsg" style="margin-bottom:2rem; font-size:0.9rem;">Are you sure you want to remove this squad?</p>
+    <div style="display:flex; gap:10px; justify-content:center;">
+      <button class="btn btn-sm btn-success" onclick="document.getElementById('deleteModal').style.display='none'">Keep Team</button>
+      <button class="btn btn-sm btn-danger" id="confirmDeleteBtn">Delete Squad</button>
     </div>
   </div>
+</div>
 
-  <div id="toast"></div>
+<!-- Image Lightbox Overlay -->
+<div class="lightbox-overlay" id="imageLightbox" onclick="closeImagePreview()">
+  <button class="lightbox-close">&times;</button>
+  <img src="" id="lightboxImg" class="lightbox-content" onclick="event.stopPropagation()">
+  <p style="color:white; margin-top:1rem; font-size:0.8rem;">Click anywhere outside to close</p>
+</div>
 
-  <script>
-    // CONFIGURATION: Ensure these match your actual deployment URLs
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyu4VEYlUUe6Y6Q49MU1yfGep_79ka5vAOiL-3tMR3-BBZH4tv85XpChYESeIfTgqUA/exec';
-    const LEADERBOARD_URL = 'https://script.google.com/macros/s/AKfycbw7PjCWe4B47Q4tlDctys0mPGMD2YC6o1LMspXwCrslXP71UU9Ge5ggeJkq8uoJUK8scQ/exec';
-    const ADMIN_PASS = 'bgmi2025';
+<div id="toast"></div>
 
-    let isAdmin = false;
-    let currentEditingTeam = null;
+<script>
+  // CONFIGURATION
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyu4VEYlUUe6Y6Q49MU1yfGep_79ka5vAOiL-3tMR3-BBZH4tv85XpChYESeIfTgqUA/exec';
+  const LEADERBOARD_URL = 'https://script.google.com/macros/s/AKfycbw7PjCWe4B47Q4tlDctys0mPGMD2YC6o1LMspXwCrslXP71UU9Ge5ggeJkq8uoJUK8scQ/exec';
+  const ADMIN_PASS = 'bgmi2025';
+  
+  // SUPABASE CONFIG
+  const SUPABASE_URL = 'https://wqwbsslfeosoyhryinvh.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indxd2Jzc2xmZW9zb3locnlpbnZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0OTE1MDIsImV4cCI6MjA5MTA2NzUwMn0.PbosbHilv_diqsAvXDTev1MIgjIW2R8MghKmvi8Yrgc';
+  
+  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // Build input grids
-    (function initGrids() {
-      const regGrid = document.getElementById('playersGrid');
-      const editGrid = document.getElementById('editPlayersGrid');
-      for (let i = 1; i <= 4; i++) {
-        regGrid.innerHTML += `<div class="form-group"><label>Player ${i}</label><input type="text" id="p${i}" placeholder="IGN"></div>`;
-        editGrid.innerHTML += `<div class="form-group"><label>P${i}</label><input type="text" id="ep${i}"></div>`;
-      }
-    })();
+  let isAdmin = false;
+  let currentEditingTeam = null;
 
-    function showPage(page, btn) {
-      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-      document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-      document.getElementById('page-' + page).classList.add('active');
-      if (btn) btn.classList.add('active');
-      if (page === 'teams') loadTeams();
-      if (page === 'leaderboard') fetchLeaderboard();
-      if (page === 'admin' && isAdmin) loadAdminTeams();
+  (function initGrids() {
+    const regGrid = document.getElementById('playersGrid');
+    const editGrid = document.getElementById('editPlayersGrid');
+    for (let i = 1; i <= 4; i++) {
+      regGrid.innerHTML += `<div class="form-group"><label>Player ${i}</label><input type="text" id="p${i}" placeholder="IGN"></div>`;
+      editGrid.innerHTML += `<div class="form-group"><label>P${i}</label><input type="text" id="ep${i}"></div>`;
     }
+  })();
 
-    // API Call Wrapper
-    async function api(url, method = 'GET', body = null) {
-      const options = { method, redirect: 'follow', mode: 'cors' };
-      if (body) {
-        options.body = JSON.stringify(body);
-        options.headers = { 'Content-Type': 'text/plain;charset=utf-8' };
-      }
-      const res = await fetch(url, options);
-      return await res.json();
+  function showPage(page, btn) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('page-' + page).classList.add('active');
+    if (btn) btn.classList.add('active');
+    if (page === 'teams') loadTeams();
+    if (page === 'leaderboard') fetchLeaderboard();
+    if (page === 'admin' && isAdmin) loadAdminTeams();
+  }
+
+  async function api(url, method = 'GET', body = null) {
+    const options = { method, redirect: 'follow', mode: 'cors' };
+    if (body) {
+      options.body = JSON.stringify(body);
+      options.headers = { 'Content-Type': 'text/plain;charset=utf-8' };
     }
+    const res = await fetch(url, options);
+    return await res.json();
+  }
 
-    // --- LEADERBOARD ---
-    async function fetchLeaderboard() {
-      const body = document.getElementById('leaderboardBody');
-      body.innerHTML = '<tr><td colspan="5" class="loading">Fetching standings...</td></tr>';
-      try {
-        const data = await api(LEADERBOARD_URL + '?action=getLeaderboard&_t=' + Date.now());
-        if (data.success) {
-          const sorted = data.teams.sort((a, b) => b.totalPoints - a.totalPoints);
-          body.innerHTML = sorted.map((t, i) => `<tr>
-          <td class="rank-cell">${i + 1}</td>
+  // --- LEADERBOARD ---
+  async function fetchLeaderboard() {
+    const body = document.getElementById('leaderboardBody');
+    body.innerHTML = '<tr><td colspan="5" class="loading">Fetching standings...</td></tr>';
+    try {
+      const data = await api(LEADERBOARD_URL + '?action=getLeaderboard&_t=' + Date.now());
+      if (data.success) {
+        const sorted = data.teams.sort((a,b) => b.totalPoints - a.totalPoints);
+        body.innerHTML = sorted.map((t,i) => `<tr>
+          <td class="rank-cell">${i+1}</td>
           <td style="font-weight:600;">${esc(t.teamName)}</td>
           <td class="hide-mobile">${t.kills || 0}</td>
           <td class="hide-mobile">${t.placement || 0}</td>
           <td class="points-cell">${t.totalPoints || 0}</td>
         </tr>`).join('');
-        }
-      } catch (e) { body.innerHTML = '<tr><td colspan="5">Leaderboard service unavailable.</td></tr>'; }
-    }
+      }
+    } catch(e) { body.innerHTML = '<tr><td colspan="5">Offline.</td></tr>'; }
+  }
 
-    // --- REGISTRATION ---
-    async function registerTeam() {
-      const teamName = document.getElementById('teamName').value.trim();
-      const players = [1, 2, 3, 4].map(i => document.getElementById('p' + i).value.trim());
-      const phone = document.getElementById('contactPhone').value.trim();
-      const roll = document.getElementById('rollNo').value.trim();
+  // --- REGISTRATION ---
+  async function registerTeam() {
+    const teamName = document.getElementById('teamName').value.trim();
+    const players = [1,2,3,4].map(i => document.getElementById('p'+i).value.trim());
+    const phone = document.getElementById('contactPhone').value.trim();
+    const roll = document.getElementById('rollNo').value.trim();
+    const fileInput = document.getElementById('screenshotInput');
+    const file = fileInput.files[0];
+    
+    if (!teamName || players.some(p => !p) || !phone || !roll) return toast('All fields required');
+    if (!file) return toast('Please upload payment screenshot');
+    
+    const btn = document.getElementById('regBtn');
+    btn.disabled = true;
+    btn.textContent = 'Uploading...';
 
-      if (!teamName || players.some(p => !p)) return toast('Please fill all player names');
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}_${teamName.replace(/\s+/g, '_')}.${fileExt}`;
+      const { error: uploadError } = await supabaseClient.storage.from('screenshots').upload(fileName, file);
+      if (uploadError) throw uploadError;
+      const { data: { publicUrl } } = supabaseClient.storage.from('screenshots').getPublicUrl(fileName);
 
-      const btn = document.getElementById('regBtn');
-      btn.disabled = true;
-      try {
-        const data = await api(SCRIPT_URL, 'POST', { action: 'register', teamName, players, phone, roll });
-        if (data.success) {
-          toast('Registration Sent Successfully!');
-          document.querySelectorAll('#page-register input').forEach(i => i.value = '');
-        } else toast(data.message || 'Registration failed');
-      } catch (e) { toast('Error connecting to server'); }
-      btn.disabled = false;
-    }
+      const data = await api(SCRIPT_URL, 'POST', { 
+        action: 'register', teamName, players, phone, roll, screenshotUrl: publicUrl
+      });
+      if (data.success) {
+        toast('Registration Successful!');
+        document.querySelectorAll('#page-register input').forEach(i => i.value = '');
+      }
+    } catch(e) { toast('Error: ' + e.message); }
+    finally { btn.disabled = false; btn.textContent = 'Complete Registration'; }
+  }
 
-    // --- PUBLIC TEAMS VIEW ---
-    async function loadTeams() {
-      const container = document.getElementById('teamsContainer');
-      container.innerHTML = '<div class="loading">Loading squads...</div>';
-      try {
-        const data = await api(SCRIPT_URL + '?action=getTeams');
-        if (data.success) {
-          document.getElementById('teamCount').textContent = `${data.teams.length} Teams Registered`;
-          container.innerHTML = data.teams.map((t, idx) => `
-          <div class="team-card" onclick="togglePlayers(${idx})">
+  // --- PUBLIC TEAMS VIEW ---
+  async function loadTeams() {
+    const container = document.getElementById('teamsContainer');
+    container.innerHTML = '<div class="loading">Loading squads...</div>';
+    try {
+      const data = await api(SCRIPT_URL + '?action=getTeams');
+      if (data.success) {
+        document.getElementById('teamCount').textContent = `${data.teams.length} Squads Registered`;
+        container.innerHTML = data.teams.map((t, idx) => `
+          <div class="team-card" onclick="this.classList.toggle('expanded')">
             <div style="display:flex; justify-content:space-between; align-items:center;">
               <strong style="font-family:Rajdhani; font-size:1.1rem; color:var(--accent);">${esc(t.teamName)}</strong>
               <span class="status-badge status-${t.status.toLowerCase()}">${t.status}</span>
             </div>
-            <div class="team-players" id="players-${idx}">
-              <div style="font-size:0.75rem; color:var(--muted); margin-bottom:5px; text-transform:uppercase; letter-spacing:1px;">Squad Members:</div>
+            <div class="team-players">
               <div style="font-size:0.9rem; color:var(--text); line-height:1.6;">
                 ${t.players.map(p => `• ${esc(p)}`).join('<br>')}
               </div>
             </div>
-          </div>
-        `).join('');
-        }
-      } catch (e) { container.innerHTML = 'Failed to load team list.'; }
-    }
+          </div>`).join('');
+      }
+    } catch(e) { container.innerHTML = 'Error syncing list.'; }
+  }
 
-    function togglePlayers(idx) {
-      const card = document.querySelectorAll('.team-card')[idx];
-      card.classList.toggle('expanded');
-    }
+  // --- ADMIN FUNCTIONS ---
+  function doAdminLogin() {
+    if (document.getElementById('adminPass').value === ADMIN_PASS) {
+      isAdmin = true;
+      document.getElementById('adminLoginWrap').style.display = 'none';
+      document.getElementById('adminPanel').style.display = 'block';
+      loadAdminTeams();
+    } else toast('Invalid password');
+  }
 
-    // --- ADMIN FUNCTIONALITY ---
-    function doAdminLogin() {
-      if (document.getElementById('adminPass').value === ADMIN_PASS) {
-        isAdmin = true;
-        document.getElementById('adminLoginWrap').style.display = 'none';
-        document.getElementById('adminPanel').style.display = 'block';
-        loadAdminTeams();
-      } else toast('Wrong Admin Password');
-    }
+  function doAdminLogout() { isAdmin = false; document.getElementById('adminLoginWrap').style.display = 'block'; document.getElementById('adminPanel').style.display = 'none'; }
 
-    function doAdminLogout() {
-      isAdmin = false;
-      document.getElementById('adminLoginWrap').style.display = 'block';
-      document.getElementById('adminPanel').style.display = 'none';
-    }
-
-    async function loadAdminTeams() {
-      const container = document.getElementById('adminTeamsContainer');
-      container.innerHTML = '<div class="loading">Fetching master records...</div>';
-      try {
-        const data = await api(`${SCRIPT_URL}?action=getAllTeams&adminKey=${ADMIN_PASS}`);
-        if (data.success) {
-          container.innerHTML = data.teams.map(t => `
+  async function loadAdminTeams() {
+    const container = document.getElementById('adminTeamsContainer');
+    container.innerHTML = '<div class="loading">Syncing records...</div>';
+    try {
+      const data = await api(`${SCRIPT_URL}?action=getAllTeams&adminKey=${ADMIN_PASS}`);
+      if (data.success) {
+        container.innerHTML = data.teams.map(t => `
           <div class="team-card" style="cursor:default;">
             <div style="display:flex; justify-content:space-between; align-items:start;">
               <div>
-                <strong style="font-size:1.1rem;">${esc(t.teamName)}</strong>
-                <div style="font-size:0.75rem; color:var(--muted); margin-top:4px;">
-                  📞 ${esc(t.phone)} | 🆔 ${esc(t.roll)}
-                </div>
+                <strong>${esc(t.teamName)}</strong>
+                <div style="font-size:0.75rem; color:var(--muted);">📞 ${esc(t.phone)} | Roll: ${esc(t.roll)}</div>
               </div>
               <div style="display:flex; flex-direction:column; align-items:end; gap:5px;">
                 <span class="status-badge status-${t.status.toLowerCase()}">${t.status}</span>
                 <div style="display:flex; gap:5px;">
                   ${t.status === 'Pending' ? `<button class="btn btn-sm btn-success" onclick="approveTeam('${esc(t.teamName)}')">Approve</button>` : ''}
                   <button class="btn btn-sm btn-blue" onclick='openEditModal(${JSON.stringify(t)})'>Edit</button>
-                  <button class="btn btn-sm btn-danger" onclick="deleteTeam('${esc(t.teamName)}')">Del</button>
+                  <button class="btn btn-sm btn-danger" onclick="confirmDelete('${esc(t.teamName)}')">Del</button>
                 </div>
               </div>
             </div>
-            <div style="font-size:0.85rem; margin-top:10px; border-top:1px solid var(--border); padding-top:8px; color:var(--text);">
+            <div style="margin-top:12px; font-size:0.85rem; border-top:1px solid var(--border); padding-top:10px;">
               ${t.players.join(' · ')}
             </div>
-            ${t.code ? `<div style="margin-top:10px; padding:8px; background:rgba(255,255,255,0.05); border-radius:6px; font-family:Rajdhani; color:var(--accent); font-weight:700;">VERIFICATION CODE: ${t.code}</div>` : ''}
-          </div>
-        `).join('');
-        }
-      } catch (e) { container.innerHTML = 'Error loading admin data.'; }
-    }
-
-    async function approveTeam(name) {
-      try {
-        const data = await api(`${SCRIPT_URL}?action=approve&team=${encodeURIComponent(name)}&adminKey=${ADMIN_PASS}`);
-        if (data.success) { toast(`Approved! Code: ${data.code}`); loadAdminTeams(); }
-      } catch (e) { toast('Error approving team'); }
-    }
-
-    async function deleteTeam(name) {
-      if (!confirm(`Delete team "${name}" permanently?`)) return;
-      try {
-        const data = await api(`${SCRIPT_URL}?action=deleteTeam&team=${encodeURIComponent(name)}&adminKey=${ADMIN_PASS}`);
-        if (data.success) { toast('Squad Removed'); loadAdminTeams(); }
-      } catch (e) { toast('Error deleting team'); }
-    }
-
-    // --- MODAL EDITING ---
-    function openEditModal(team) {
-      currentEditingTeam = team.teamName;
-      document.getElementById('editTeamName').value = team.teamName;
-      document.getElementById('editPhone').value = team.phone || '';
-      document.getElementById('editRoll').value = team.roll || '';
-      for (let i = 1; i <= 4; i++) {
-        document.getElementById('ep' + i).value = team.players[i - 1] || '';
+            ${t.screenshotUrl ? `
+              <div style="margin-top:10px;">
+                <p style="font-size:0.7rem; color:var(--muted); text-transform:uppercase; margin-bottom:5px;">Payment Verification:</p>
+                <img src="${t.screenshotUrl}" class="screenshot-thumbnail" onclick="openImagePreview('${t.screenshotUrl}')" title="Click to preview">
+              </div>` : '<p style="margin-top:10px; color:var(--red); font-size:0.8rem;">No payment proof found</p>'}
+            ${t.code ? `<div style="margin-top:10px; padding:8px; background:rgba(255,255,255,0.05); border-radius:6px; font-family:Rajdhani; color:var(--accent); font-weight:700;">CODE: ${t.code}</div>` : ''}
+          </div>`).join('');
       }
-      document.getElementById('editModal').style.display = 'flex';
-    }
+    } catch(e) { container.innerHTML = 'Error loading admin data.'; }
+  }
 
-    function closeEditModal() {
-      document.getElementById('editModal').style.display = 'none';
-    }
+  async function approveTeam(name) {
+    const data = await api(`${SCRIPT_URL}?action=approve&team=${encodeURIComponent(name)}&adminKey=${ADMIN_PASS}`);
+    if(data.success) { toast('Approved! Code: ' + data.code); loadAdminTeams(); }
+  }
 
-    async function updateTeamData() {
-      const newName = document.getElementById('editTeamName').value.trim();
-      const players = [1, 2, 3, 4].map(i => document.getElementById('ep' + i).value.trim());
-      const phone = document.getElementById('editPhone').value.trim();
-      const roll = document.getElementById('editRoll').value.trim();
+  function confirmDelete(name) {
+    document.getElementById('deleteMsg').textContent = `Are you sure you want to delete squad "${name}" permanently?`;
+    document.getElementById('deleteModal').style.display = 'flex';
+    document.getElementById('confirmDeleteBtn').onclick = async () => {
+      document.getElementById('deleteModal').style.display = 'none';
+      const data = await api(`${SCRIPT_URL}?action=deleteTeam&team=${encodeURIComponent(name)}&adminKey=${ADMIN_PASS}`);
+      if(data.success) { toast('Squad Deleted'); loadAdminTeams(); }
+      else toast('Error: ' + data.message);
+    };
+  }
 
-      if (!newName || players.some(p => !p)) return toast('Fill required fields');
+  // --- IMAGE PREVIEW LIGHTBOX ---
+  function openImagePreview(url) {
+    const lightbox = document.getElementById('imageLightbox');
+    const img = document.getElementById('lightboxImg');
+    img.src = url;
+    lightbox.style.display = 'flex';
+  }
 
-      const btn = document.getElementById('updateBtn');
-      btn.disabled = true;
-      try {
-        const data = await api(SCRIPT_URL, 'POST', {
-          action: 'updateTeam',
-          adminKey: ADMIN_PASS,
-          oldName: currentEditingTeam,
-          teamName: newName,
-          players: players,
-          phone: phone,
-          roll: roll
-        });
-        if (data.success) {
-          toast('Squad Updated Successfully');
-          closeEditModal();
-          loadAdminTeams();
-        }
-      } catch (e) { toast('Update failed'); }
-      btn.disabled = false;
-    }
+  function closeImagePreview() {
+    document.getElementById('imageLightbox').style.display = 'none';
+  }
 
-    // Utils
-    function toast(msg) {
-      const t = document.getElementById('toast');
-      t.textContent = msg;
-      t.className = 'show';
-      setTimeout(() => t.className = '', 4000);
-    }
+  // --- EDIT MODAL ---
+  function openEditModal(team) {
+    currentEditingTeam = team.teamName;
+    document.getElementById('editTeamName').value = team.teamName;
+    document.getElementById('editPhone').value = team.phone || '';
+    document.getElementById('editRoll').value = team.roll || '';
+    for(let i=1; i<=4; i++) document.getElementById('ep'+i).value = team.players[i-1] || '';
+    document.getElementById('editModal').style.display = 'flex';
+  }
 
-    function esc(s) {
-      return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    }
-  </script>
+  function closeEditModal() { document.getElementById('editModal').style.display = 'none'; }
+
+  async function updateTeamData() {
+    const newName = document.getElementById('editTeamName').value.trim();
+    const players = [1,2,3,4].map(i => document.getElementById('ep'+i).value.trim());
+    const phone = document.getElementById('editPhone').value.trim();
+    const roll = document.getElementById('editRoll').value.trim();
+    const btn = document.getElementById('updateBtn');
+    btn.disabled = true;
+    try {
+      const data = await api(SCRIPT_URL, 'POST', { action: 'updateTeam', adminKey: ADMIN_PASS, oldName: currentEditingTeam, teamName: newName, players, phone, roll });
+      if(data.success) { toast('Updated'); closeEditModal(); loadAdminTeams(); }
+    } catch(e) { toast('Update failed'); }
+    btn.disabled = false;
+  }
+
+  function toast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.className = 'show';
+    setTimeout(() => t.className = '', 4000);
+  }
+
+  function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+</script>
 </body>
-
 </html>
